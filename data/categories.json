@@ -1,0 +1,44 @@
+[
+  {
+    "id": "latest_posts",
+    "name": "最新帖子",
+    "color": "neon",
+    "postCount": 2,
+    "description": "最新发布的帖子"
+  },
+  {
+    "id": "hot_posts",
+    "name": "热门推荐",
+    "color": "pink",
+    "postCount": 4,
+    "description": "最热门的推荐帖子"
+  },
+  {
+    "id": "experience",
+    "name": "使用经验分享",
+    "color": "yellow",
+    "postCount": 187,
+    "description": "分享使用AI仿生人的经验和技巧"
+  },
+  {
+    "id": "custom",
+    "name": "功能定制开发",
+    "color": "pink",
+    "postCount": 96,
+    "description": "讨论AI仿生人的功能定制和开发"
+  },
+  {
+    "id": "advanced",
+    "name": "高级功能探讨",
+    "color": "purple",
+    "postCount": 78,
+    "description": "深入探讨AI仿生人的高级功能和未来发展方向"
+  },
+  {
+    "id": "announcement",
+    "name": "官方公告",
+    "color": "gray",
+    "postCount": 12,
+    "description": "官方发布的重要通知和更新"
+  }
+]
