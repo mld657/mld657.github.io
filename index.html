@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeoBionic | AI仿生人用户论坛</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              neon: '#00f3ff',
+              pink: '#ff2a6d',
+              purple: '#d300c5',
+              yellow: '#f9f002',
+              dark: '#0d0221',
+              darker: '#050110',
+              gray: '#2a2438'
+            },
+          },
+          fontFamily: {
+            cyber: ['Orbitron', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          animation: {
+            'glitch': 'glitch 2s infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            glitch: {
+              '0%, 100%': { transform: 'translate(0)' },
+              '20%': { transform: 'translate(-2px, 2px)' },
+              '40%': { transform: 'translate(-2px, -2px)' },
+              '60%': { transform: 'translate(2px, 2px)' },
+              '80%': { transform: 'translate(2px, -2px)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-shadow-neon {
+        text-shadow: 0 0 5px theme('colors.cyber.neon'), 0 0 10px theme('colors.cyber.neon'), 0 0 20px theme('colors.cyber.neon');
+      }
+      .text-shadow-pink {
+        text-shadow: 0 0 5px theme('colors.cyber.pink'), 0 0 10px theme('colors.cyber.pink'), 0 0 20px theme('colors.cyber.pink');
+      }
+      .bg-grid {
+        background-image: linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      .border-glow {
+        box-shadow: 0 0 5px theme('colors.cyber.neon'), 0 0 10px theme('colors.cyber.neon');
+      }
+      .border-glow-pink {
+        box-shadow: 0 0 5px theme('colors.cyber.pink'), 0 0 10px theme('colors.cyber.pink');
+      }
+      .scrollbar-cyber::-webkit-scrollbar {
+        width: 8px;
+      }
+      .scrollbar-cyber::-webkit-scrollbar-track {
+        background: theme('colors.cyber.dark');
+      }
+      .scrollbar-cyber::-webkit-scrollbar-thumb {
+        background: theme('colors.cyber.neon');
+        border-radius: 4px;
+      }
+      .scrollbar-cyber::-webkit-scrollbar-thumb:hover {
+        background: theme('colors.cyber.pink');
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body class="bg-cyber-darker text-gray-200 font-mono bg-grid min-h-screen scrollbar-cyber">
+  <div id="authModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden">
+    <div class="bg-cyber-dark border border-cyber-neon border-glow rounded-lg w-full max-w-md p-6 relative">
+      <button id="closeModal" class="absolute top-4 right-4 text-cyber-neon hover:text-cyber-pink transition-colors">
+        <i class="fa fa-times text-xl"></i>
+      </button>
+      <div class="flex justify-center mb-6">
+        <h2 class="text-2xl font-cyber font-bold text-center text-shadow-neon text-cyber-neon">
+          <span class="animate-glitch">NeoBionic</span> 论坛
+        </h2>
+      </div>
+      <div class="flex mb-6 border-b border-cyber-neon">
+        <button id="loginTab" class="flex-1 py-2 px-4 text-cyber-neon font-cyber border-b-2 border-cyber-neon">登 录</button>
+        <button id="registerTab" class="flex-1 py-2 px-4 text-gray-500 font-cyber hover:text-cyber-pink transition-colors">注 册</button>
+      </div>
+      <div id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-cyber-neon mb-1 text-sm">账 号</label>
+          <input type="text" value="User92837" class="w-full bg-cyber-gray border border-cyber-neon px-3 py-2 rounded focus:outline-none focus:border-cyber-pink focus:border-glow-pink transition-all">
+        </div>
+        <div>
+          <label class="block text-cyber-neon mb-1 text-sm">密 码</label>
+          <input type="password" value="123456" class="w-full bg-cyber-gray border border-cyber-neon px-3 py-2 rounded focus:outline-none focus:border-cyber-pink focus:border-glow-pink transition-all">
+        </div>
+        <button id="loginBtn" class="w-full bg-cyber-neon text-cyber-dark font-cyber font-bold py-2 rounded hover:bg-cyber-pink transition-colors border-glow">登 录</button>
+      </div>
+      <div id="registerForm" class="space-y-4 hidden">
+         <div class="text-center text-gray-400">系统维护中，暂停注册</div>
+      </div>
+    </div>
+  </div>
+
+  <header class="sticky top-0 z-40 bg-cyber-dark/90 backdrop-blur-md border-b border-cyber-neon/30">
+    <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between">
+      <div class="flex items-center mb-3 md:mb-0 cursor-pointer" onclick="window.location.reload()">
+        <h1 class="text-2xl md:text-3xl font-cyber font-bold text-shadow-neon text-cyber-neon">
+          <span class="animate-glitch">Neo</span><span class="text-cyber-pink text-shadow-pink">Bionic</span>
+        </h1>
+        <span class="ml-2 text-xs bg-cyber-pink/20 text-cyber-pink px-2 py-1 rounded text-shadow-pink">AI仿生人社群</span>
+      </div>
+      
+      <div class="relative w-full md:w-1/2 lg:w-1/3">
+        <div id="searchDisabled" class="absolute inset-0 flex items-center justify-center bg-cyber-dark/90 rounded border border-cyber-neon z-10">
+          <span class="text-cyber-neon flex items-center cursor-pointer" onclick="document.getElementById('userBtn').click()">
+            <i class="fa fa-lock mr-2"></i> 请登录后使用搜索功能
+          </span>
+        </div>
+        <input type="text" id="searchInput" placeholder="搜索帖子/用户..." autocomplete="off"
+               class="w-full bg-cyber-gray border border-cyber-neon px-4 py-2 pl-10 rounded focus:outline-none focus:border-cyber-pink focus:border-glow-pink transition-all">
+        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-cyber-neon">
+          <i class="fa fa-search"></i>
+        </div>
+        <div class="absolute right-3 top-1/2 -translate-y-1/2 flex space-x-2">
+          <button id="searchTypePost" class="text-xs text-cyber-neon bg-cyber-darker px-2 py-0.5 rounded border border-cyber-neon">帖子</button>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-4 mt-3 md:mt-0">
+        <button id="createPostBtn" class="text-sm bg-cyber-pink/20 text-cyber-pink px-4 py-1 rounded border border-cyber-pink hover:bg-cyber-pink/30 transition-colors">
+          <i class="fa fa-pencil mr-1"></i> 发布帖子
+        </button>
+        <button id="userBtn" class="flex items-center space-x-2 bg-cyber-gray/50 px-3 py-1 rounded border border-cyber-neon hover:border-glow transition-colors">
+          <div class="w-8 h-8 rounded-full bg-cyber-neon/20 flex items-center justify-center border border-cyber-neon">
+            <i class="fa fa-user text-cyber-neon"></i>
+          </div>
+          <span class="text-sm hidden md:inline">登录 / 注册</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <aside class="lg:col-span-1 order-2 lg:order-1">
+      <div class="bg-cyber-dark border border-cyber-neon/30 rounded-lg p-4 mb-6">
+        <h3 class="font-cyber text-cyber-neon text-shadow-neon mb-4 pb-2 border-b border-cyber-neon/20">论坛分类</h3>
+        <ul class="space-y-2">
+          <li><a href="#" class="flex items-center space-x-2 p-2 rounded bg-cyber-neon/10 border-l-4 border-cyber-neon"><i class="fa fa-question-circle text-cyber-neon"></i><span>使用问题解答</span><span class="ml-auto text-xs bg-cyber-neon/20 text-cyber-neon px-2 py-0.5 rounded">248</span></a></li>
+          <li><a href="#" class="flex items-center space-x-2 p-2 rounded hover:bg-cyber-gray/30 transition-all duration-300 category-link" data-category="experience"><i class="fa fa-lightbulb-o text-cyber-yellow"></i><span class="text-gray-300">使用经验分享</span><span class="ml-auto text-xs bg-cyber-yellow/20 text-cyber-yellow px-2 py-0.5 rounded">187</span></a></li>
+          <li><a href="#" class="flex items-center space-x-2 p-2 rounded hover:bg-cyber-gray/30 transition-all duration-300 category-link" data-category="custom"><i class="fa fa-cogs text-cyber-pink"></i><span class="text-gray-300">功能定制开发</span><span class="ml-auto text-xs bg-cyber-pink/20 text-cyber-pink px-2 py-0.5 rounded">96</span></a></li>
+          <li><a href="#" class="flex items-center space-x-2 p-2 rounded hover:bg-cyber-gray/30 transition-all duration-300 category-link" data-category="advanced"><i class="fa fa-star text-cyber-purple"></i><span class="text-gray-300">高级功能探讨</span><span class="ml-auto text-xs bg-cyber-purple/20 text-cyber-purple px-2 py-0.5 rounded">78</span></a></li>
+          <li><a href="#" class="flex items-center space-x-2 p-2 rounded hover:bg-cyber-gray/30 transition-all duration-300 announcement-link"><i class="fa fa-newspaper-o text-gray-400"></i><span class="text-gray-500">官方公告</span><span class="ml-auto text-xs bg-gray-600 text-gray-400 px-2 py-0.5 rounded">12</span></a></li>
+        </ul>
+      </div>
+      
+      <div class="bg-cyber-dark border border-cyber-neon/30 rounded-lg p-4 mb-6">
+        <h3 class="font-cyber text-cyber-neon text-shadow-neon mb-4 pb-2 border-b border-cyber-neon/20">活跃用户</h3>
+        <ul class="space-y-3">
+          <li class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-cyber-neon/20 flex items-center justify-center border border-cyber-neon"><span class="text-cyber-neon font-cyber text-xs">TB</span></div>
+            <div><div class="font-medium text-white">TechBot9000</div><div class="text-xs text-gray-400">技术支持专员</div></div>
+          </li>
+          <li class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-cyber-pink/20 flex items-center justify-center border border-cyber-pink"><span class="text-cyber-pink font-cyber text-xs">AS</span></div>
+            <div><div class="font-medium text-white">AI_Support</div><div class="text-xs text-gray-400">高级工程师</div></div>
+          </li>
+          <li class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-cyber-purple/20 flex items-center justify-center border border-cyber-purple"><span class="text-cyber-purple font-cyber text-xs">US</span></div>
+            <div><div class="font-medium text-white">UserExpert</div><div class="text-xs text-gray-400">资深用户</div></div>
+          </li>
+        </ul>
+        <button class="w-full mt-3 text-sm text-cyber-neon hover:text-cyber-pink transition-colors">
+          查看更多 <i class="fa fa-angle-right ml-1"></i>
+        </button>
+      </div>
+      
+      <div class="bg-cyber-dark border border-cyber-neon/30 rounded-lg p-4">
+        <h3 class="font-cyber text-cyber-neon text-shadow-neon mb-4 pb-2 border-b border-cyber-neon/20">论坛数据</h3>
+        <div class="h-48"><canvas id="forumStatsChart"></canvas></div>
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div class="bg-cyber-gray/30 p-2 rounded text-center">
+            <div class="text-cyber-neon font-cyber text-xl">5,892</div>
+            <div class="text-xs text-gray-400">总帖子数</div>
+          </div>
+          <div class="bg-cyber-gray/30 p-2 rounded text-center">
+            <div class="text-cyber-pink font-cyber text-xl">1,248</div>
+            <div class="text-xs text-gray-400">活跃用户</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <div class="lg:col-span-3 order-1 lg:order-2">
+      <div id="homePage">
+        <!-- Hero Banner - 添加 data-post-id="7" -->
+        <div id="heroBanner" class="bg-cyber-dark border border-cyber-neon rounded-lg overflow-hidden mb-8 animate-pulse-slow cursor-pointer hover:border-glow transition-all" data-post-id="7">
+          <div class="relative h-64 md:h-80">
+            <img src="https://picsum.photos/1200/600?random=1" alt="AI仿生人使用指南" 
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-cyber-darker to-transparent"></div>
+            <div class="absolute bottom-0 left-0 p-6 w-full">
+              <span class="bg-cyber-neon text-cyber-dark text-xs px-3 py-1 rounded-full mb-3 inline-block">官方教程</span>
+              <h2 id="featuredTitle" class="text-2xl md:text-3xl font-cyber font-bold text-white mb-2 text-shadow-neon">编号AX400的救赎与告别</h2>
+              <p class="text-gray-300 mb-4 max-w-2xl">我在"启明智能"负责售后接待，见过形形色色的报修理由...</p>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div class="flex items-center"><i class="fa fa-eye text-cyber-neon mr-1"></i><span class="text-sm">12,845</span></div>
+                  <div class="flex items-center"><i class="fa fa-comment text-cyber-neon mr-1"></i><span class="text-sm">387</span></div>
+                </div>
+                <button class="bg-cyber-neon text-cyber-dark font-bold px-4 py-2 rounded hover:bg-cyber-pink transition-colors">阅读详情</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 搜索结果区域 (新增) -->
+        <div id="searchResults" class="hidden mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-cyber font-bold text-cyber-neon text-shadow-neon">
+              <i class="fa fa-search mr-2"></i>搜索结果
+            </h3>
+            <button id="clearSearch" class="text-sm text-gray-400 hover:text-cyber-neon transition-colors">
+              <i class="fa fa-times mr-1"></i> 清除搜索
+            </button>
+          </div>
+          <div id="searchResultsList" class="space-y-4">
+            <!-- 搜索结果将在这里动态生成 -->
+          </div>
+        </div>
+        
+        <!-- 热门推荐 - 动态生成，添加 data-post-id -->
+        <div id="recommendedSection" class="mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-cyber font-bold text-cyber-neon text-shadow-neon">热门推荐</h3>
+            <div class="flex space-x-2">
+              <button class="text-sm text-cyber-neon bg-cyber-dark border border-cyber-neon px-3 py-1 rounded hover:border-glow transition-colors">最新</button>
+              <button class="text-sm text-gray-400 bg-cyber-dark border border-gray-600 px-3 py-1 rounded hover:text-cyber-pink hover:border-cyber-pink transition-colors">热门</button>
+            </div>
+          </div>
+          
+          <div id="hotPostsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- 热门推荐文章将在这里动态生成 -->
+          </div>
+        </div>
+        
+        <!-- 最新帖子 - 动态生成，添加 data-post-id -->
+        <div id="latestPostsSection">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-cyber font-bold text-cyber-neon text-shadow-neon">最新帖子</h3>
+            <a href="#" class="text-cyber-pink hover:underline text-sm">查看全部 <i class="fa fa-angle-right ml-1"></i></a>
+          </div>
+          <div id="latestPostsList" class="space-y-4">
+            <!-- 最新帖子将在这里动态生成 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 分类页面 -->
+      <div id="categoryPage" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+          <h2 id="categoryTitle" class="text-2xl font-cyber font-bold text-shadow-neon">分类页面</h2>
+          <button id="backToHomeFromCategory" class="bg-cyber-gray/50 text-cyber-neon px-4 py-2 rounded border border-cyber-neon hover:border-glow transition-colors"><i class="fa fa-arrow-left mr-2"></i>返回首页</button>
+        </div>
+        
+        <div class="flex space-x-4 mb-6">
+          <button id="sortLatest" class="bg-cyber-neon/20 text-cyber-neon px-4 py-2 rounded border border-cyber-neon">最新</button>
+          <button id="sortHot" class="bg-cyber-gray text-gray-300 px-4 py-2 rounded border border-gray-600">最热</button>
+        </div>
+        
+        <div id="categoryPosts" class="space-y-4">
+          <!-- 分类帖子将在这里动态生成 -->
+        </div>
+      </div>
+
+      <!-- 文章详情页 -->
+      <div id="articleDetailPage" class="hidden lg:col-span-3 order-1 lg:order-2">
+        <div class="flex items-center justify-between mb-6">
+          <button id="backToHome" class="bg-cyber-gray/50 text-cyber-neon px-4 py-2 rounded border border-cyber-neon hover:border-glow transition-colors">
+            <i class="fa fa-arrow-left mr-2"></i>返回首页
+          </button>
+          <div class="flex items-center space-x-4">
+            <button class="text-cyber-neon hover:text-cyber-pink transition-colors">
+              <i class="fa fa-thumbs-up mr-1"></i> 点赞
+            </button>
+            <button class="text-cyber-neon hover:text-cyber-pink transition-colors">
+              <i class="fa fa-share mr-1"></i> 分享
+            </button>
+          </div>
+        </div>
+        
+        <article class="bg-cyber-dark border border-cyber-neon/30 rounded-lg p-8">
+          <header class="mb-8">
+            <h1 id="articleTitle" class="text-3xl font-cyber font-bold text-cyber-neon text-shadow-neon mb-4">文章标题</h1>
+            <div class="flex items-center justify-between text-sm text-gray-400">
+              <div class="flex items-center space-x-4">
+                <span id="articleAuthor">作者：未知</span>
+                <span id="articleTime">发布时间：--</span>
+                <span id="articleCategory">分类：--</span>
+              </div>
+              <div class="flex items-center space-x-4">
+                <span><i class="fa fa-eye mr-1"></i> <span id="articleViews">0</span></span>
+                <span><i class="fa fa-comment mr-1"></i> <span id="articleComments">0</span></span>
+              </div>
+            </div>
+          </header>
+          
+          <div id="articleContent" class="prose prose-invert text-gray-300 leading-relaxed max-w-none">
+            <p class="mb-4 text-justify leading-relaxed">加载中...</p>
+          </div>
+          
+          <footer class="mt-8 pt-8 border-t border-cyber-neon/20">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <button class="bg-cyber-pink/20 text-cyber-pink px-4 py-2 rounded hover:bg-cyber-pink/30 transition-colors">
+                  <i class="fa fa-heart mr-2"></i> 收藏
+                </button>
+                <button class="bg-cyber-neon/20 text-cyber-neon px-4 py-2 rounded hover:bg-cyber-neon/30 transition-colors">
+                  <i class="fa fa-bookmark mr-2"></i> 关注
+                </button>
+              </div>
+              <div class="text-sm text-gray-400">
+                <span>标签：</span>
+                <span class="text-cyber-neon">#AI仿生人</span>
+                <span class="text-cyber-pink">#技术交流</span>
+              </div>
+            </div>
+          </footer>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <div id="announcementModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden">
+    <div class="bg-cyber-dark border border-cyber-neon border-glow rounded-lg w-full max-w-2xl p-6 relative">
+      <button id="closeAnnouncement" class="absolute top-4 right-4 text-cyber-neon hover:text-cyber-pink transition-colors">
+        <i class="fa fa-times text-xl"></i>
+      </button>
+      
+      <h2 class="text-2xl font-cyber font-bold text-cyber-neon text-shadow-neon mb-6">
+        官方公告
+      </h2>
+      
+      <div id="announcementContent" class="space-y-6">
+        <div class="mb-6 pb-6 border-b border-gray-700 last:border-0 last:mb-0 last:pb-0">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-lg font-medium text-gray-100">V2.3.0版本更新通知</h4>
+            <span class="text-sm text-gray-400">2025-12-15</span>
+          </div>
+          <p class="text-gray-300">本次更新优化了情感识别准确率，新增3种交互模式，修复了部分设备休眠唤醒bug。</p>
+        </div>
+        <div class="mb-6 pb-6 border-b border-gray-700 last:border-0 last:mb-0 last:pb-0">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-lg font-medium text-gray-100">春节期间服务调整公告</h4>
+            <span class="text-sm text-gray-400">2025-12-10</span>
+          </div>
+          <p class="text-gray-300">1月20日-2月10日期间，客服响应时间延长至24小时内，紧急问题请拨打专线：400-XXX-XXXX。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-cyber-dark border-t border-cyber-neon/30 mt-12 py-8">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-xl font-cyber font-bold text-cyber-neon text-shadow-neon mb-4">
+            NeoBionic
+          </h3>
+          <p class="text-gray-400 mb-4">
+            领先的AI仿生人技术提供商，致力于为用户提供最先进的人工智能伴侣体验
+          </p>
+          <div class="flex space-x-4">
+            <a href="#" class="w-8 h-8 rounded-full bg-cyber-gray flex items-center justify-center text-cyber-neon hover:bg-cyber-neon hover:text-cyber-dark transition-colors">
+              <i class="fa fa-twitter"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-cyber-gray flex items-center justify-center text-cyber-neon hover:bg-cyber-neon hover:text-cyber-dark transition-colors">
+              <i class="fa fa-facebook"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-cyber-gray flex items-center justify-center text-cyber-neon hover:bg-cyber-neon hover:text-cyber-dark transition-colors">
+              <i class="fa fa-github"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-cyber-gray flex items-center justify-center text-cyber-neon hover:bg-cyber-neon hover:text-cyber-dark transition-colors">
+              <i class="fa fa-discord"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-cyber-neon font-cyber mb-4">快速链接</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-400 hover:text-cyber-pink transition-colors">产品官网</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-cyber-pink transition-colors">技术支持</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-cyber-pink transition-colors">用户手册</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-cyber-pink transition-colors">固件更新</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-cyber-pink transition-colors">售后服务</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-cyber-neon font-cyber mb-4">联系我们</h4>
+          <ul class="space-y-2">
+            <li class="flex items-center space-x-2">
+              <i class="fa fa-envelope text-cyber-neon"></i>
+              <span class="text-gray-400">support@neobionic.ai</span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <i class="fa fa-phone text-cyber-neon"></i>
+              <span class="text-gray-400">+888 999 8888</span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <i class="fa fa-map-marker text-cyber-neon"></i>
+              <span class="text-gray-400">New Neo City, Cyber District</span>
+            </li>
+          </ul>
+          <button class="mt-4 bg-cyber-pink/20 text-cyber-pink px-4 py-2 rounded border border-cyber-pink hover:bg-cyber-pink/30 transition-colors">
+            订阅更新
+          </button>
+        </div>
+      </div>
+      
+      <div class="border-t border-cyber-neon/20 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-500 text-sm mb-4 md:mb-0">
+          © 2025 NeoBionic Technologies. All rights reserved.
+        </p>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-500 text-sm hover:text-cyber-neon transition-colors">隐私政策</a>
+          <a href="#" class="text-gray-500 text-sm hover:text-cyber-neon transition-colors">使用条款</a>
+          <a href="#" class="text-gray-500 text-sm hover:text-cyber-neon transition-colors">Cookie政策</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 全局变量存储数据
+    let posts = [];
+    let categories = {};
+    let currentCategory = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // ==================== 1. 初始化图表 ====================
+      const ctx = document.getElementById('forumStatsChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+          datasets: [{
+            label: '新帖子',
+            data: [120, 190, 300, 500, 800, 950],
+            borderColor: '#00f3ff',
+            backgroundColor: 'rgba(0, 243, 255, 0.1)',
+            tension: 0.4,
+            fill: true
+          }, {
+            label: '解决问题',
+            data: [90, 150, 250, 400, 600, 780],
+            borderColor: '#ff2a6d',
+            backgroundColor: 'rgba(255, 42, 109, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#e5e7eb'
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 243, 255, 0.1)'
+              },
+              ticks: {
+                color: '#9ca3af'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(0, 243, 255, 0.1)'
+              },
+              ticks: {
+                color: '#9ca3af'
+              }
+            }
+          }
+        }
+      });
+
+      // ==================== 2. 认证模态框 ====================
+      const authModal = document.getElementById('authModal');
+      const userBtn = document.getElementById('userBtn');
+      const loginBtn = document.getElementById('loginBtn');
+      const searchDisabled = document.getElementById('searchDisabled');
+      
+      userBtn.addEventListener('click', () => {
+        authModal.classList.remove('hidden');
+        authModal.classList.add('flex');
+      });
+      
+      document.getElementById('closeModal').addEventListener('click', () => {
+        authModal.classList.add('hidden');
+        authModal.classList.remove('flex');
+      });
+      
+      loginBtn.addEventListener('click', () => {
+        authModal.classList.add('hidden');
+        authModal.classList.remove('flex');
+        searchDisabled.classList.add('hidden');
+        userBtn.innerHTML = `<span class="text-cyber-neon font-bold">User92837</span>`;
+        alert('登录成功！搜索功能已开启。');
+      });
+
+      // ==================== 3. 公告模态框 ====================
+      const announcementLink = document.querySelector('.announcement-link');
+      const announcementModal = document.getElementById('announcementModal');
+      const closeAnnouncement = document.getElementById('closeAnnouncement');
+
+      announcementLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        announcementModal.classList.remove('hidden');
+      });
+
+      closeAnnouncement.addEventListener('click', () => {
+        announcementModal.classList.add('hidden');
+      });
+
+      announcementModal.addEventListener('click', (e) => {
+        if (e.target === announcementModal) {
+          announcementModal.classList.add('hidden');
+        }
+      });
+
+      // ==================== 4. 返回首页按钮 ====================
+      document.getElementById('backToHome').addEventListener('click', () => {
+        document.getElementById('articleDetailPage').classList.add('hidden');
+        document.getElementById('homePage').classList.remove('hidden');
+      });
+
+      document.getElementById('backToHomeFromCategory').addEventListener('click', () => {
+        document.getElementById('categoryPage').classList.add('hidden');
+        document.getElementById('homePage').classList.remove('hidden');
+      });
+
+      // ==================== 5. 分类排序按钮 ====================
+      document.getElementById('sortLatest').addEventListener('click', function() {
+        this.classList.remove('bg-cyber-gray', 'text-gray-300');
+        this.classList.add('bg-cyber-neon/20', 'text-cyber-neon');
+        document.getElementById('sortHot').classList.remove('bg-cyber-neon/20', 'text-cyber-neon');
+        document.getElementById('sortHot').classList.add('bg-cyber-gray', 'text-gray-300');
+        
+        if (currentCategory) {
+          renderCategoryPosts(currentCategory, 'latest');
+        }
+      });
+
+      document.getElementById('sortHot').addEventListener('click', function() {
+        this.classList.remove('bg-cyber-gray', 'text-gray-300');
+        this.classList.add('bg-cyber-neon/20', 'text-cyber-neon');
+        document.getElementById('sortLatest').classList.remove('bg-cyber-neon/20', 'text-cyber-neon');
+        document.getElementById('sortLatest').classList.add('bg-cyber-gray', 'text-gray-300');
+        
+        if (currentCategory) {
+          renderCategoryPosts(currentCategory, 'hot');
+        }
+      });
+
+      // ==================== 6. 分类链接点击事件 ====================
+      document.querySelectorAll('.category-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const categoryKey = link.getAttribute('data-category');
+          const category = categories[categoryKey];
+          if (category) {
+            currentCategory = category;
+            document.getElementById('categoryTitle').textContent = category.name;
+            renderCategoryPosts(category, 'latest');
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('categoryPage').classList.remove('hidden');
+          }
+        });
+      });
+
+      // ==================== 7. 核心功能：事件委托处理文章点击 ====================
+      document.addEventListener('click', function(e) {
+        // 查找最近的带有 data-post-id 属性的元素
+        const articleItem = e.target.closest('[data-post-id]');
+        
+        if (articleItem) {
+          const postId = parseInt(articleItem.getAttribute('data-post-id'));
+          if (postId) {
+            openArticleDetail(postId);
+          }
+        }
+      });
+
+      // ==================== 8. 打开文章详情 ====================
+      window.openArticleDetail = function(postId) {
+        const post = posts.find(p => p.id === postId);
+        if (!post) {
+          console.error('找不到文章:', postId);
+          return;
+        }
+
+        // 隐藏其他页面，显示文章详情页
+        document.getElementById('homePage').classList.add('hidden');
+        document.getElementById('categoryPage').classList.add('hidden');
+        document.getElementById('articleDetailPage').classList.remove('hidden');
+
+        // 更新文章基本信息
+        document.getElementById('articleTitle').textContent = post.title;
+        document.getElementById('articleAuthor').textContent = `作者：${post.author}`;
+        document.getElementById('articleTime').textContent = `发布时间：${new Date(post.time).toLocaleDateString('zh-CN')}`;
+        document.getElementById('articleViews').textContent = post.views;
+        document.getElementById('articleComments').textContent = post.comments;
+        
+        // 更新分类名称
+        const category = categories[post.category] || { name: '未知分类' };
+        document.getElementById('articleCategory').textContent = `分类：${category.name}`;
+
+        // 加载文章内容
+        loadArticleContent(post);
+        
+        // 滚动到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      // ==================== 9. 加载文章内容 ====================
+      function loadArticleContent(post) {
+        const articleContent = document.getElementById('articleContent');
+        articleContent.innerHTML = '<p class="text-center text-gray-400">加载中...</p>';
+
+        // 从 JSON 文件加载文章内容
+        fetch(`data/${post.contentFile}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`无法加载文章内容: ${post.contentFile}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            // 格式化文章内容（处理换行）
+            const formattedContent = data.content
+              .split('\n')
+              .filter(line => line.trim() !== '')
+              .map(line => `<p class="mb-4 text-justify leading-relaxed">${line.trim()}</p>`)
+              .join('');
+            
+            articleContent.innerHTML = formattedContent;
+          })
+          .catch(error => {
+            console.error('加载文章内容失败:', error);
+            // 降级处理：使用 posts.json 中的简短内容或提示
+            articleContent.innerHTML = `
+              <div class="bg-cyber-pink/20 border border-cyber-pink rounded p-4 mb-4">
+                <p class="text-cyber-pink mb-2"><i class="fa fa-exclamation-triangle mr-2"></i>加载文章内容失败</p>
+                <p class="text-gray-300">文章ID: ${post.id}</p>
+                <p class="text-gray-300">标题: ${post.title}</p>
+                <p class="text-gray-400 text-sm mt-2">${post.contentFile || '内容文件未找到'}</p>
+              </div>
+            `;
+          });
+      }
+
+      // ==================== 10. 加载数据 ====================
+      async function loadData() {
+        try {
+          // 加载分类数据
+          const categoriesResponse = await fetch('data/categories.json');
+          if (!categoriesResponse.ok) throw new Error('categories.json 加载失败');
+          categories = await categoriesResponse.json();
+          
+          // 将数组转换为对象，方便通过 key 访问
+          categories = categories.reduce((acc, cat) => {
+            acc[cat.id] = cat;
+            return acc;
+          }, {});
+          
+          // 加载文章数据
+          const postsResponse = await fetch('data/posts.json');
+          if (!postsResponse.ok) throw new Error('posts.json 加载失败');
+          posts = await postsResponse.json();
+          
+          // 渲染页面内容
+          renderHotPosts();
+          renderLatestPosts();
+          
+          console.log('✅ 数据加载成功');
+        } catch (error) {
+          console.error('❌ 加载数据失败:', error);
+          // 加载失败时使用备用数据
+          loadFallbackData();
+        }
+      }
+
+      // ==================== 11. 渲染热门推荐 ====================
+      function renderHotPosts() {
+        const hotPostsContainer = document.getElementById('hotPostsGrid');
+        if (!hotPostsContainer) return;
+
+        // 筛选热门推荐文章 (category: "hot_posts")
+        const hotPosts = posts.filter(post => post.category === 'hot_posts');
+        
+        hotPostsContainer.innerHTML = hotPosts.map(post => `
+          <div class="bg-cyber-dark border border-cyber-neon/30 rounded-lg p-4 hover:border-cyber-neon hover:border-glow transition-all group cursor-pointer" data-post-id="${post.id}">
+            <div class="flex space-x-4">
+              <div class="w-20 h-20 bg-cyber-gray rounded overflow-hidden flex-shrink-0">
+                <img src="https://picsum.photos/200/200?random=${post.id}" alt="推荐图片" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+              </div>
+              <div class="flex-1">
+                <h4 class="font-medium text-white mb-2 group-hover:text-cyber-neon transition-colors">${post.title}</h4>
+                <p class="text-gray-400 text-sm mb-3 line-clamp-2">${post.content || '暂无简介'}</p>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                  <span>${post.author} · ${getTimeAgo(post.time)}</span>
+                  <span><i class="fa fa-comment mr-1"></i> ${post.comments}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // ==================== 12. 渲染最新帖子 ====================
+      function renderLatestPosts() {
+        const latestPostsContainer = document.getElementById('latestPostsList');
+        if (!latestPostsContainer) return;
+
+        // 筛选最新帖子 (category: "latest_posts")
+        const latestPosts = posts.filter(post => post.category === 'latest_posts');
+        
+        latestPostsContainer.innerHTML = latestPosts.map(post => `
+          <div class="bg-cyber-dark border border-cyber-neon/30 rounded-lg p-4 hover:border-cyber-neon hover:border-glow transition-all cursor-pointer" data-post-id="${post.id}">
+            <div class="flex justify-between mb-3">
+              <div class="flex items-center space-x-2">
+                <span class="bg-cyber-neon/20 text-cyber-neon text-xs px-2 py-0.5 rounded">最新</span>
+                <span class="text-gray-500 text-xs">发布于 ${getTimeAgo(post.time)}</span>
+                ${post.status === 'solved' ? '<span class="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded">已解决</span>' : ''}
+              </div>
+              <div class="flex items-center space-x-3">
+                <div class="flex items-center text-xs text-gray-400">
+                  <i class="fa fa-eye text-cyber-neon mr-1"></i>
+                  <span>${post.views}</span>
+                </div>
+                <div class="flex items-center text-xs text-gray-400">
+                  <i class="fa fa-comment text-cyber-neon mr-1"></i>
+                  <span>${post.comments}</span>
+                </div>
+              </div>
+            </div>
+            <h4 class="text-lg font-medium text-white mb-2 hover:text-cyber-neon transition-colors">${post.title}</h4>
+            <p class="text-gray-400 mb-4 line-clamp-2">${post.content || '暂无简介'}</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-cyber-gray flex items-center justify-center">
+                  <span class="text-xs font-cyber">${post.author.charAt(0)}</span>
+                </div>
+                <span class="text-sm">${post.author}</span>
+              </div>
+              <button class="text-cyber-neon hover:text-cyber-pink text-sm transition-colors">
+                回复 <i class="fa fa-reply ml-1"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // ==================== 13. 渲染分类帖子 ====================
+      function renderCategoryPosts(category, sortType) {
+        const postsContainer = document.getElementById('categoryPosts');
+        if (!postsContainer) return;
+
+        // 筛选该分类下的文章
+        const categoryPosts = posts.filter(post => post.category === category.id);
+        
+        // 排序
+        const sortedPosts = [...categoryPosts].sort((a, b) => {
+          return sortType === 'latest' 
+            ? new Date(b.time) - new Date(a.time)
+            : b.views - a.views;
+        });
+
+        if (sortedPosts.length === 0) {
+          postsContainer.innerHTML = '<div class="text-center text-gray-500 py-8">该分类下暂无文章</div>';
+          return;
+        }
+
+        // 根据分类颜色动态设置样式
+        const colorClass = `border-cyber-${category.color}/50`;
+        
+        postsContainer.innerHTML = sortedPosts.map(post => `
+          <div class="bg-cyber-dark border ${colorClass} rounded-lg p-4 transition-all hover:border-cyber-${category.color} cursor-pointer" data-post-id="${post.id}">
+            <h4 class="text-lg font-medium mb-2 text-gray-100">${post.title}</h4>
+            <div class="flex justify-between items-center text-sm text-gray-400">
+              <div class="flex items-center">
+                <span class="mr-3">作者：${post.author}</span>
+                <span>${new Date(post.time).toLocaleDateString('zh-CN')}</span>
+              </div>
+              <div class="flex items-center space-x-4">
+                <span><i class="fa fa-eye mr-1"></i> ${post.views}</span>
+                <span><i class="fa fa-comment mr-1"></i> ${post.comments}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // ==================== 14. 辅助函数：计算相对时间 ====================
+      function getTimeAgo(timeStr) {
+        const now = new Date();
+        const time = new Date(timeStr);
+        const diff = Math.floor((now - time) / 1000); // 秒数差
+
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`;
+        if (diff < 2592000) return `${Math.floor(diff / 86400)}天前`;
+        return `${Math.floor(diff / 2592000)}个月前`;
+      }
+
+      // ==================== 15. 备用数据 ====================
+      function loadFallbackData() {
+        console.log('⚠️ 使用备用数据...');
+        categories = {
+          latest_posts: { id: 'latest_posts', name: '最新帖子', color: 'neon', description: '最新发布的帖子' },
+          hot_posts: { id: 'hot_posts', name: '热门推荐', color: 'pink', description: '最热门的推荐帖子' },
+          experience: { id: 'experience', name: '使用经验分享', color: 'yellow', description: '分享使用AI仿生人的经验和技巧' },
+          custom: { id: 'custom', name: '功能定制开发', color: 'pink', description: '讨论AI仿生人的功能定制和开发' },
+          advanced: { id: 'advanced', name: '高级功能探讨', color: 'purple', description: '深入探讨AI仿生人的高级功能和未来发展方向' },
+          announcement: { id: 'announcement', name: '官方公告', color: 'gray', description: '官方发布的重要通知和更新' }
+        };
+        
+        posts = [
+          {
+            id: 1,
+            title: "我的AI仿生人无法连接到家庭网络怎么办？",
+            author: "User92837",
+            category: "latest_posts",
+            time: "2025-12-26T19:08:00",
+            views: 128,
+            comments: 5,
+            status: "normal",
+            contentFile: "post1.json",
+            content: "最近更新系统后，我的仿生人的网络连接功能出现问题，无法连接到WiFi，尝试了重启和重新配置都无效，有人遇到类似问题吗？急需解决方案，谢谢大家的帮助！"
+          },
+          {
+            id: 2,
+            title: "分享：如何提升AI仿生人学习效率的小技巧",
+            author: "ExpertUser",
+            category: "latest_posts",
+            time: "2025-12-26T18:45:00",
+            views: 245,
+            comments: 12,
+            status: "solved",
+            contentFile: "post2.json",
+            content: "分享几个提升AI仿生人学习效率的实用技巧，包括优化学习环境、合理安排学习时间、利用奖励机制等，帮助您的仿生人更快掌握新技能，提升日常使用体验。"
+          },
+          {
+            id: 3,
+            title: "AI仿生人情感模块调试方法",
+            author: "TechSupport",
+            category: "hot_posts",
+            time: "2025-12-25T14:30:00",
+            views: 542,
+            comments: 89,
+            status: "normal",
+            contentFile: "post3.json",
+            content: "如何调整您的AI仿生人的情感响应，使其更符合您的使用需求。通过精细调节情感参数，可以让仿生人展现出更丰富的情感表达，提升用户互动体验，让交流更加自然流畅。"
+          },
+          {
+            id: 4,
+            title: "如何延长AI仿生人电池寿命",
+            author: "BatteryExpert",
+            category: "hot_posts",
+            time: "2025-12-23T16:20:00",
+            views: 215,
+            comments: 45,
+            status: "normal",
+            contentFile: "post4.json",
+            content: "分享实用的电池维护技巧，包括正确的充电方式、使用习惯调整、电池健康监测等，帮助您有效延长AI仿生人的电池使用寿命，减少更换电池的频率和成本。"
+          },
+          {
+            id: 5,
+            title: "自定义AI仿生人个性设置教程",
+            author: "CustomDev",
+            category: "hot_posts",
+            time: "2025-12-24T09:15:00",
+            views: 328,
+            comments: 67,
+            status: "normal",
+            contentFile: "post5.json",
+            content: "详细介绍如何自定义AI仿生人的个性设置，包括语言风格、行为模式、兴趣爱好等多个方面的配置，让您的仿生人拥有独一无二的个性化特征，更好地融入您的生活。"
+          },
+          {
+            id: 6,
+            title: "AI仿生人常见故障排除指南",
+            author: "TechSupport",
+            category: "hot_posts",
+            time: "2025-12-20T10:30:00",
+            views: 427,
+            comments: 156,
+            status: "normal",
+            contentFile: "post6.json",
+            content: "汇总AI仿生人使用过程中常见的故障现象及其排除方法，涵盖网络连接、语音识别、运动控制等多个系统模块，提供详细的故障诊断步骤和解决方案，帮助用户快速解决问题。"
+          },
+          {
+            id: 7,
+            title: "编号AX400的救赎与告别",
+            author: "售后接待员",
+            category: "story",
+            time: "2025-12-17T00:00:00",
+            views: 12845,
+            comments: 387,
+            status: "featured",
+            contentFile: "post7.json",
+            content: "一个关于AI仿生人AX400的感人故事，讲述了它从出厂、服役到最终退役的全过程，见证了人与AI之间深厚的情感纽带，引发了对AI生命价值的深刻思考，触动人心，令人回味无穷。"
+          },
+          {
+            id: 101,
+            title: "延长AI仿生人电池寿命的技巧",
+            author: "电池专家",
+            category: "experience",
+            time: "2025-12-16T00:00:00",
+            views: 542,
+            comments: 89,
+            status: "normal",
+            contentFile: "post101.json",
+            content: "专业电池维护经验分享，包括温度控制、充放电周期管理、电池校准等高级技巧，帮助用户深入了解电池工作原理，科学使用和保养电池，显著延长AI仿生人的续航时间。"
+          },
+          {
+            id: 102,
+            title: "情感模块个性化设置技巧",
+            author: "情感调试师",
+            category: "experience",
+            time: "2025-12-15T00:00:00",
+            views: 328,
+            comments: 67,
+            status: "normal",
+            contentFile: "post102.json",
+            content: "深入讲解情感模块的个性化设置方法，通过调节情感阈值、响应速度、表情丰富度等参数，打造符合个人喜好的AI仿生人情感表现，让交互体验更加个性化和富有温度。"
+          },
+          {
+            id: 103,
+            title: "日常维护注意事项汇总",
+            author: "维护达人",
+            category: "experience",
+            time: "2025-12-14T00:00:00",
+            views: 215,
+            comments: 45,
+            status: "normal",
+            contentFile: "post103.json",
+            content: "全面总结AI仿生人日常维护的注意事项，包括定期清洁、系统更新、硬件检查、软件优化等方面，提供详细的维护清单和时间表，帮助用户建立科学的维护习惯，保持仿生人最佳状态。"
+          },
+          {
+            id: 201,
+            title: "自定义唤醒词开发指南",
+            author: "程序猿A",
+            category: "custom",
+            time: "2025-12-16T00:00:00",
+            views: 632,
+            comments: 124,
+            status: "normal",
+            contentFile: "post201.json",
+            content: "详细讲解如何为AI仿生人开发自定义唤醒词，包括语音识别原理、开发环境搭建、代码实现步骤、测试方法等，适合有一定编程基础的开发者学习，打造专属的唤醒方式。"
+          },
+          {
+            id: 202,
+            title: "第三方插件接入教程",
+            author: "程序猿B",
+            category: "custom",
+            time: "2025-12-15T00:00:00",
+            views: 418,
+            comments: 98,
+            status: "normal",
+            contentFile: "post202.json",
+            content: "全面介绍第三方插件的接入方法，包括插件系统架构、API接口调用、权限配置、调试技巧等内容，帮助开发者扩展AI仿生人的功能，实现更多定制化应用场景，提升使用价值。"
+          },
+          {
+            id: 203,
+            title: "API接口调用示例",
+            author: "技术总监",
+            category: "custom",
+            time: "2025-12-13T00:00:00",
+            views: 356,
+            comments: 76,
+            status: "normal",
+            contentFile: "post203.json",
+            content: "提供丰富的API接口调用示例代码，涵盖语音交互、数据查询、远程控制等多个功能模块，每个示例都包含详细注释和使用说明，方便开发者快速上手集成开发。"
+          },
+          {
+            id: 301,
+            title: "神经网络模型优化方案",
+            author: "AI研究员",
+            category: "advanced",
+            time: "2025-12-16T00:00:00",
+            views: 489,
+            comments: 102,
+            status: "normal",
+            contentFile: "post301.json",
+            content: "深入探讨AI仿生人神经网络模型的优化策略，包括模型压缩、算力优化、推理加速等技术方案，帮助研究人员和开发者提升模型性能，在有限的硬件资源下实现更高效的智能表现。"
+          },
+          {
+            id: 302,
+            title: "多模态交互技术解析",
+            author: "交互设计师",
+            category: "advanced",
+            time: "2025-12-14T00:00:00",
+            views: 325,
+            comments: 87,
+            status: "normal",
+            contentFile: "post302.json",
+            content: "全面解析AI仿生人的多模态交互技术，涵盖语音、视觉、触觉等多种交互方式的融合应用，介绍最新的交互设计理念和技术实现方案，为提升用户体验提供理论指导和实践参考。"
+          },
+          {
+            id: 303,
+            title: "未来功能 roadmap 预测",
+            author: "行业观察员",
+            category: "advanced",
+            time: "2025-12-12T00:00:00",
+            views: 298,
+            comments: 65,
+            status: "normal",
+            contentFile: "post303.json",
+            content: "基于当前技术发展趋势，预测AI仿生人未来的功能演进路线图，包括更高级的自主学习能力、更自然的情感表达、更丰富的应用场景等，为用户提供前瞻性的产品规划参考。"
+          }
+        ];
+        
+        renderHotPosts();
+        renderLatestPosts();
+      }
+
+      // ==================== 16. 搜索功能 ====================
+      const searchInput = document.getElementById('searchInput');
+      const searchResults = document.getElementById('searchResults');
+      const searchResultsList = document.getElementById('searchResultsList');
+      const clearSearch = document.getElementById('clearSearch');
+      const heroBanner = document.getElementById('heroBanner');
+      
+      let searchTimeout;
+      
+      // 搜索输入事件监听
+      searchInput.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const keyword = e.target.value.trim();
+        
+        // 延迟200ms执行搜索，避免频繁请求
+        searchTimeout = setTimeout(() => { 
+          performSearch(keyword); 
+        }, 200);
+      });
+
+      // 执行搜索
+      function performSearch(keyword) {
+        if (!keyword) {
+          // 关键词为空，恢复首页显示
+          heroBanner.classList.remove('hidden');
+          searchResults.classList.add('hidden');
+          searchResultsList.innerHTML = '';
+          return;
+        }
+
+        // 隐藏 heroBanner，显示搜索结果
+        heroBanner.classList.add('hidden');
+        searchResults.classList.remove('hidden');
+
+        // 搜索逻辑：在 posts 数组中查找匹配的文章
+        const results = posts.filter(post => {
+          const titleMatch = post.title.toLowerCase().includes(keyword.toLowerCase());
+          // 注意：在备用数据中，文章的完整内容可能不存在，只有简短的摘要或 contentFile 字段
+          const contentMatch = (post.content && post.content.toLowerCase().includes(keyword.toLowerCase())) || false;
+          const authorMatch = post.author.toLowerCase().includes(keyword.toLowerCase());
+          
+          return titleMatch || contentMatch || authorMatch;
+        });
+
+        // 渲染搜索结果
+        if (results.length > 0) {
+          renderSearchResults(results, keyword);
+        } else {
+          renderNoResults(keyword);
+        }
+      }
+
+      // 渲染搜索结果
+      function renderSearchResults(results, keyword) {
+        searchResultsList.innerHTML = results.map(post => {
+          // 高亮关键词
+          const highlightedTitle = highlightKeyword(post.title, keyword);
+          const categoryName = getPostCategoryName(post.category);
+          
+          return `
+            <div class="bg-cyber-dark border border-cyber-neon/30 rounded-lg p-4 transition-all hover:border-cyber-neon hover:border-glow cursor-pointer search-result-item" data-post-id="${post.id}">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="text-lg font-medium text-white hover:text-cyber-neon flex-1">${highlightedTitle}</h4>
+                <span class="text-xs text-cyber-neon border border-cyber-neon px-2 py-0.5 rounded ml-2">${categoryName}</span>
+              </div>
+              <p class="text-gray-400 text-sm mb-2 line-clamp-2">${post.content || '暂无简介'}</p>
+              <div class="flex justify-between items-center text-xs text-gray-500">
+                <span><i class="fa fa-user mr-1"></i>${post.author}</span>
+                <div class="flex items-center space-x-3">
+                  <span><i class="fa fa-eye mr-1"></i>${post.views}</span>
+                  <span><i class="fa fa-comment mr-1"></i>${post.comments}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 渲染无结果提示
+      function renderNoResults(keyword) {
+        searchResultsList.innerHTML = `
+          <div class="text-center text-gray-500 py-8">
+            <i class="fa fa-search text-4xl mb-4 opacity-50"></i>
+            <p class="text-lg mb-2">未找到 "${keyword}" 相关内容</p>
+            <p class="text-sm">试试其他关键词，如"电池"、"情感"、"定制"等</p>
+          </div>
+        `;
+      }
+
+      // 高亮关键词
+      function highlightKeyword(text, keyword) {
+        if (!keyword) return text;
+        
+        const regex = new RegExp(`(${keyword})`, 'gi');
+        return text.replace(regex, '<span class="bg-cyber-pink/50 text-white px-1 rounded">$1</span>');
+      }
+
+      // 获取分类名称
+      function getPostCategoryName(categoryId) {
+        const categoryMap = {
+          'latest_posts': '最新',
+          'hot_posts': '热门',
+          'experience': '经验分享',
+          'custom': '功能定制',
+          'advanced': '高级探讨',
+          'story': '情感故事',
+          'announcement': '官方公告'
+        };
+        return categoryMap[categoryId] || '未分类';
+      }
+
+      // 清除搜索
+      clearSearch.addEventListener('click', () => {
+        searchInput.value = '';
+        heroBanner.classList.remove('hidden');
+        searchResults.classList.add('hidden');
+      });
+
+      // 启动数据加载
+      loadData();
+    });
+  </script>
+</body>
+</html>
